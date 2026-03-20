@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: int_operations_enriched
+    description: "Каждое событие обогащено нормативом, ставкой, дельтой и потерей"
+    columns:
+      - name: case_id
+        tests:
+          - not_null
+      - name: operation_name
+        tests:
+          - not_null
+      - name: event_date
+        tests:
+          - not_null
+      - name: norm_seconds
+        tests:
+          - not_null
+      - name: hourly_rate_rub
+        tests:
+          - not_null
+      - name: delta_sec
+        description: "Всегда >= 0 (clip at 0)"
+      - name: loss_rub
+        description: "Потеря ФОТ на одно событие (руб)"
+
+  - name: int_scada_daily_stats
+    description: "Дневная агрегация показаний СКАДА по оборудованию и метрике"
+    columns:
+      - name: reading_date
+        tests:
+          - not_null
+      - name: equipment_id
+        tests:
+          - not_null
+      - name: metric_name
+        tests:
+          - not_null
+      - name: reading_count
+        tests:
+          - not_null
+      - name: avg_value
+        tests:
+          - not_null

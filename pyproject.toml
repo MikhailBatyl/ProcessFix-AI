@@ -1,0 +1,16 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.pytest]
+env = [
+    "APP_ENV=test",
+    "POSTGRES_HOST=localhost",
+    "CLICKHOUSE_HOST=localhost",
+    "TELEGRAM_BOT_TOKEN=",
+    "OPENAI_API_KEY=",
+    "ANALYTICS_SOURCE=raw",
+]

@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: mart_daily_losses
+    description: >
+      Ежедневная витрина потерь ФОТ по операциям.
+      Одна строка на (event_date, operation_name).
+      Включает z-score для ранжирования аномалий.
+    columns:
+      - name: event_date
+        tests:
+          - not_null
+      - name: operation_name
+        tests:
+          - not_null
+      - name: event_count
+        tests:
+          - not_null
+      - name: avg_duration_sec
+        tests:
+          - not_null
+      - name: norm_seconds
+        tests:
+          - not_null
+      - name: total_loss_rub
+        tests:
+          - not_null
+      - name: z_score
+        description: "Z-score отклонения длительности от нормы"
+    tests:
+      - unique:
+          column_name: "operation_name || '::' || toString(event_date)"
+
+  - name: mart_equipment_health
+    description: >
+      Ежедневная витрина здоровья оборудования (SCADA).
+      Одна строка на (reading_date, equipment_id, metric_name).
+    columns:
+      - name: reading_date
+        tests:
+          - not_null
+      - name: equipment_id
+        tests:
+          - not_null
+      - name: metric_name
+        tests:
+          - not_null
+      - name: avg_value
+        tests:
+          - not_null
+      - name: reading_count
+        tests:
+          - not_null
+      - name: has_issues
+        description: "1 если были warning / maintenance за день"
+    tests:
+      - unique:
+          column_name: "equipment_id || '::' || metric_name || '::' || toString(reading_date)"

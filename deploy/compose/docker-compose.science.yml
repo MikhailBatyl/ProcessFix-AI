@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  jupyter:
+    image: jupyter/scipy-notebook:python-3.11
+    container_name: processfix-jupyter
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../../notebooks:/home/jovyan/work
+      - ../../app:/home/jovyan/work/app:ro
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-processfix}
+      # Data sources
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: ${POSTGRES_USER:-processfix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: ${POSTGRES_DB:-processfix}
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: "8123"
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-processfix}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+    command: >
+      bash -c "
+      pip install --quiet clickhouse-connect sqlalchemy asyncpg psycopg2-binary openpyxl minio &&
+      start-notebook.sh --NotebookApp.token='$${JUPYTER_TOKEN}'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+networks:
+  default:
+    name: processfix-net
+    external: true

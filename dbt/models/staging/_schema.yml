@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: stg_event_logs
+    description: "Staging: логи событий с валидацией длительности и датой"
+    columns:
+      - name: case_id
+        tests:
+          - not_null
+      - name: operation_name
+        tests:
+          - not_null
+      - name: event_date
+        tests:
+          - not_null
+      - name: duration_seconds
+        description: "Отфильтрованы записи с duration <= 0 или >= 86400"
+        tests:
+          - not_null
+
+  - name: stg_process_norms
+    description: "Staging: нормативы операций (из dim_process_norms FINAL)"
+    columns:
+      - name: norm_id
+        tests:
+          - not_null
+          - unique
+      - name: operation_name
+        tests:
+          - not_null
+          - unique
+      - name: norm_seconds
+        tests:
+          - not_null
+
+  - name: stg_tariffs_fot
+    description: "Staging: ставки ФОТ по ролям (из dim_tariffs_fot FINAL)"
+    columns:
+      - name: tariff_id
+        tests:
+          - not_null
+          - unique
+      - name: role_name
+        tests:
+          - not_null
+          - unique
+      - name: hourly_rate_rub
+        tests:
+          - not_null
+
+  - name: stg_scada_telemetry
+    description: "Staging: телеметрия СКАДА с фильтрацией по quality"
+    columns:
+      - name: ts
+        tests:
+          - not_null
+      - name: equipment_id
+        tests:
+          - not_null
+      - name: metric_name
+        tests:
+          - not_null
+      - name: metric_value
+        tests:
+          - not_null
+      - name: reading_date
+        tests:
+          - not_null
+      - name: equipment_state
+        description: "running / idle / warning / maintenance"
+        tests:
+          - accepted_values:
+              values: ['running', 'idle', 'warning', 'maintenance', 'error', 'off']

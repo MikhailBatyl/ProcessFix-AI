@@ -1,0 +1,72 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Сырые таблицы ClickHouse (ingestion layer)"
+    database: "{{ env_var('CLICKHOUSE_DB', 'processfix') }}"
+    schema: "{{ env_var('CLICKHOUSE_DB', 'processfix') }}"
+    tables:
+      - name: event_logs
+        description: "Логи событий со склада / производства (WMS / ERP)"
+        columns:
+          - name: case_id
+            description: "Идентификатор кейса"
+          - name: operation_name
+            description: "Название операции"
+          - name: start_time
+            description: "Время начала"
+          - name: end_time
+            description: "Время окончания"
+          - name: duration_seconds
+            description: "Длительность в секундах"
+          - name: user_id
+            description: "Идентификатор исполнителя"
+
+      - name: scada_telemetry
+        description: "Телеметрия СКАДА: показания датчиков, состояния оборудования"
+        columns:
+          - name: ts
+            description: "Метка времени показания (мс точность)"
+          - name: equipment_id
+            description: "Идентификатор оборудования"
+          - name: equipment_name
+            description: "Название оборудования"
+          - name: metric_name
+            description: "Название метрики (temperature_c, vibration_mm_s, ...)"
+          - name: metric_value
+            description: "Числовое значение показания"
+          - name: unit
+            description: "Единица измерения"
+          - name: equipment_state
+            description: "Состояние оборудования (running / idle / warning / maintenance)"
+          - name: source_system
+            description: "Система-источник данных"
+          - name: quality
+            description: "OPC UA quality code (192 = Good)"
+
+  - name: dims
+    description: "DIM-таблицы (синхронизированы из PostgreSQL)"
+    database: "{{ env_var('CLICKHOUSE_DB', 'processfix') }}"
+    schema: "{{ env_var('CLICKHOUSE_DB', 'processfix') }}"
+    tables:
+      - name: dim_process_norms
+        description: "Нормативы операций (из PG process_norms)"
+        columns:
+          - name: id
+            description: "PK из PostgreSQL"
+          - name: operation_name
+            description: "Название операции"
+          - name: norm_seconds
+            description: "Нормативная длительность (секунды)"
+          - name: role_id
+            description: "FK на dim_tariffs_fot.id"
+
+      - name: dim_tariffs_fot
+        description: "Ставки ФОТ по ролям (из PG tariffs_fot)"
+        columns:
+          - name: id
+            description: "PK из PostgreSQL"
+          - name: role_name
+            description: "Название роли"
+          - name: hourly_rate_rub
+            description: "Почасовая ставка (руб)"

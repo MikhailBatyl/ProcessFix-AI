@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  dbt-runner:
+    build:
+      context: ../../
+      dockerfile: deploy/dockerfiles/Dockerfile.dbt
+    container_name: processfix-dbt
+    volumes:
+      - ../../dbt:/dbt
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-processfix}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      DBT_TARGET: ${DBT_TARGET:-dev}
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    working_dir: /dbt
+    entrypoint: ["sleep", "infinity"]
+
+networks:
+  default:
+    name: processfix-net
+    external: true
